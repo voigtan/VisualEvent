@@ -1,6 +1,21 @@
 
 (function(window, document, $, VisualEvent){
 
+
+// jQuery 1.10
+VisualEvent.parsers.push( function () {
+	var version = jQuery.fn.jquery.substr(0,3)*1;
+	var t = $.fn.jquery.split(".");
+	var elements = [];
+
+	if ( !jQuery || t[1]*1 < 10 ) {
+		return [];
+	}
+	jQueryGeneric(elements, jQuery.cache);
+
+	return elements;
+});
+
 // jQuery 1.5, 1.6
 VisualEvent.parsers.push( function () {
 	var version = jQuery.fn.jquery.substr(0,3)*1;
@@ -27,14 +42,15 @@ VisualEvent.parsers.push( function () {
 	
 	var elements = [];
 	jQueryGeneric( elements, jQuery.cache );
-	
+
 	return elements;
 } );
 
 
 function jQueryGeneric (elements, cache)
 {
-	for ( i in cache ) {
+	
+	for (var i in cache ) {
 		if ( typeof cache[i].events == 'object' ) {
 			var eventAttachedNode = cache[i].handle.elem;
 			var func;
@@ -44,12 +60,13 @@ function jQueryGeneric (elements, cache)
 				if ( type == 'live' ) {
 					continue;
 				}
-				
+
 				var oEvents = cache[i].events[type];
 				
 				for ( j in oEvents ) {
 					var aNodes = [];
 					var sjQuery = "jQuery "+jQuery.fn.jquery;
+
 					
 					if ( typeof oEvents[j].selector != 'undefined' && oEvents[j].selector !== null ) {
 						aNodes = $(oEvents[j].selector, cache[i].handle.elem);
@@ -58,7 +75,7 @@ function jQueryGeneric (elements, cache)
 					else {
 						aNodes.push( eventAttachedNode );
 					}
-					
+
 					for ( var k=0, kLen=aNodes.length ; k<kLen ; k++ ) {
 						elements.push( {
 							"node": aNodes[k],
@@ -74,7 +91,6 @@ function jQueryGeneric (elements, cache)
 						else {
 							func = oEvents[j].toString();
 						}
-						
 						/* We use jQuery for the Visual Event events... don't really want to display them */
 						if ( oEvents[j] && oEvents[j].namespace != "VisualEvent" && func != "0" )
 						{
@@ -86,9 +102,8 @@ function jQueryGeneric (elements, cache)
 							} );
 						}
 					}
-
 					// Remove elements that didn't have any listeners (i.e. might be a Visual Event node)
-					if ( elements[ elements.length-1 ].listeners.length === 0 ) {
+					if (elements[ elements.length-1 ] && elements[ elements.length-1 ].listeners.length === 0 ) {
 						elements.splice( elements.length-1, 1 );
 					}
 				}
